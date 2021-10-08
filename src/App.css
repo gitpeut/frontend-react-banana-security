@@ -121,3 +121,14 @@ section  {
     transform: rotate(360deg);
   }
 }
+
+.littlered{
+    color: red;
+    font-size: 0.4vw;
+}
+
+.littlewhite{
+    color: white;
+    font-size: 0.4vw;
+    font-style: italic;
+}
