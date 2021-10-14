@@ -2,6 +2,7 @@ import React, {useState, useContext} from 'react';
 import {Link, useHistory} from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 import {useForm} from "react-hook-form";
+import axios from "axios";
 
 function SignIn() {
     // import relevanet hook-form functions and set initial values to empty
@@ -17,12 +18,30 @@ function SignIn() {
     const {isLoggedIn, login} = useContext(AuthContext);
     const history = useHistory();
 
-    function validateSubmit(data) {
+    async function postLogin( email, password ){
+        const rc =  {success: false, JWT: null, result: null};
+        try{
+            rc.result = await axios.post( "http://localhost:3000/login", { email: email, password: password} );
+
+            rc.success = true;
+            console.log( rc.result);
+            localStorage.setItem('token', rc.result.data.accessToken );
+
+            return( rc );
+        }catch(e){
+            rc.result = e.response.data;
+            return ( rc );
+        }
+    }
+
+    async function validateSubmit(data) {
         console.log(`Starting login for ${data.email}`);
-        if (login(data.email)) {
+        const rc = await postLogin( data.email, data.password);
+        if ( rc.success) {
+            await login();
             history.push('/profile');
         } else {
-            setLoginError("Unknown username/password combination");
+            setLoginError(rc.result);
         }
     }
 

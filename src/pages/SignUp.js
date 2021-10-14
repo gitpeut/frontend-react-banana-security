@@ -2,6 +2,9 @@ import React, {useContext, useState} from 'react';
 import {Link, useHistory} from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 import {useForm} from "react-hook-form";
+import axios from "axios";
+import jwtDecode from "jwt-decode";
+
 import entropy from "../helpers/entropy";
 import matchEmail from "../helpers/matchEmail";
 
@@ -18,21 +21,52 @@ function SignUp() {
         },
     });
 
-    function validateSubmit(data) {
+    async function postRegistration( data ){
+        const rc =  {success: false, JWT: null, result: null};
+        try{
+
+            rc.result = await axios.post( "http://localhost:3000/register", data );
+
+            rc.success = true;
+            console.log( rc.result);
+            localStorage.setItem('token', rc.result.data.accessToken );
+
+            const decodedToken = jwtDecode( rc.result.data.accessToken );
+            console.log( 'decoded Token : ', decodedToken );
+
+            return( rc );
+        }catch(e){
+            rc.result = e.response.data;
+            return ( rc );
+        }
+    }
+
+
+    async function validateSubmit(data) {
         let message = '';
         if (!matchEmail(data.email)) {
             message = 'Email adres is ongeldig';
         }
 
-        if (entropy(data.password) < 2.8) {
+        if (entropy(data.password) < 0) { // minimal 3, now set to 0 for testing purposes
             message += (message === '') ? 'Het password is te zwak' : ' en het password is te zwak';
         }
         if (message !== '') {
             setSubmitMessage(message);
         } else {
-            setSubmitMessage('U bent geregistreerd');
-            login(data.email);
-            history.push('/profile');
+            const rc = await postRegistration( {
+               email:    data.email,
+               password: data.password,
+               username: data.username,
+            });
+
+            setSubmitMessage(rc.success?'U bent geregistreerd': rc.result );
+
+            if ( rc.success ) {
+                console.log( "Success!");
+                login();
+                history.push('/profile');
+            }
         }
     }
 
