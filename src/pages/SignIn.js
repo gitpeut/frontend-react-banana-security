@@ -17,32 +17,27 @@ function SignIn() {
     const {loggedIn, login} = useContext(AuthContext);
     const history = useHistory();
 
-    async function postLogin( email, password ){
-        const rc =  {success: false, JWT: null, result: null};
-        try{
-            rc.result = await axios.post( "http://localhost:3000/login", { email: email, password: password} );
+    async function postLogin(email, password) {
+        const rc = {success: false, JWT: null, result: null};
+        try {
+            rc.result = await axios.post("http://localhost:3000/login", {email: email, password: password});
 
             rc.success = true;
-            console.log( rc.result);
-            localStorage.setItem('token', rc.result.data.accessToken );
+            localStorage.setItem('token', rc.result.data.accessToken);
 
-            return( rc );
-        }catch(e){
+            return (rc);
+        } catch (e) {
             rc.result = e.response.data;
-            return ( rc );
+            return (rc);
         }
     }
 
     async function validateSubmit(data) {
-        console.log(`Starting login for ${data.email}`);
-        const rc = await postLogin( data.email, data.password);
-        if ( rc.success) {
-            console.log('signin - login ok');
+        const rc = await postLogin(data.email, data.password);
+        if (rc.success) {
             await login();
-            console.log('signin - go to profile');
             history.push('/profile');
         } else {
-            console.log('signin - login failed');
             setLoginError(rc.result);
         }
     }

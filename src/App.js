@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import { Switch, Route } from 'react-router-dom';
+import {Switch, Route} from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Profile from './pages/Profile';
 import Home from './pages/Home';
@@ -10,29 +10,28 @@ import PrivateRoute from "./components/PrivateRoute";
 import {AuthContext} from "./context/AuthContext";
 
 function App() {
-  const {loggedIn} = useContext(AuthContext);
-  console.log('App - ' + loggedIn );
-  return (
-    <>
-      <NavBar />
-      <div className="content">
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-             <PrivateRoute path="/profile" isAuthenticated={loggedIn}>
-                <Profile/>
-             </PrivateRoute>
-          <Route exact path="/signin">
-            <SignIn />
-          </Route>
-          <Route exact path="/signup">
-            <SignUp />
-          </Route>
-        </Switch>
-      </div>
-    </>
-  );
+    const {loggedIn} = useContext(AuthContext);
+    return (
+        <>
+            <NavBar/>
+            <div className="content">
+                <Switch>
+                    <Route exact path="/">
+                        <Home/>
+                    </Route>
+                    <PrivateRoute path="/profile" isAuthenticated={loggedIn}>
+                        <Profile/>
+                    </PrivateRoute>
+                    <Route exact path="/signin">
+                        <SignIn/>
+                    </Route>
+                    <Route exact path="/signup">
+                        <SignUp/>
+                    </Route>
+                </Switch>
+            </div>
+        </>
+    );
 }
 
 export default App;

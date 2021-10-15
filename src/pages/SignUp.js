@@ -3,8 +3,6 @@ import {Link, useHistory} from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 import {useForm} from "react-hook-form";
 import axios from "axios";
-import jwtDecode from "jwt-decode";
-
 import entropy from "../helpers/entropy";
 import matchEmail from "../helpers/matchEmail";
 
@@ -21,23 +19,19 @@ function SignUp() {
         },
     });
 
-    async function postRegistration( data ){
-        const rc =  {success: false, JWT: null, result: null};
-        try{
+    async function postRegistration(data) {
+        const rc = {success: false, JWT: null, result: null};
+        try {
 
-            rc.result = await axios.post( "http://localhost:3000/register", data );
+            rc.result = await axios.post("http://localhost:3000/register", data);
 
             rc.success = true;
-            console.log( rc.result);
-            localStorage.setItem('token', rc.result.data.accessToken );
+            localStorage.setItem('token', rc.result.data.accessToken);
 
-            const decodedToken = jwtDecode( rc.result.data.accessToken );
-            console.log( 'decoded Token : ', decodedToken );
-
-            return( rc );
-        }catch(e){
+            return (rc);
+        } catch (e) {
             rc.result = e.response.data;
-            return ( rc );
+            return (rc);
         }
     }
 
@@ -54,16 +48,16 @@ function SignUp() {
         if (message !== '') {
             setSubmitMessage(message);
         } else {
-            const rc = await postRegistration( {
-               email:    data.email,
-               password: data.password,
-               username: data.username,
+            const rc = await postRegistration({
+                email: data.email,
+                password: data.password,
+                username: data.username,
             });
 
-            setSubmitMessage(rc.success?'U bent geregistreerd': rc.result );
+            setSubmitMessage(rc.success ? 'U bent geregistreerd' : rc.result);
 
-            if ( rc.success ) {
-                console.log( "Success!");
+            if (rc.success) {
+                console.log("Success!");
                 login();
                 history.push('/profile');
             }
