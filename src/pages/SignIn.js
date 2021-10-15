@@ -13,9 +13,8 @@ function SignIn() {
             password: "",
         },
     });
-
     const [loginError, setLoginError] = useState(null);
-    const {isLoggedIn, login} = useContext(AuthContext);
+    const {loggedIn, login} = useContext(AuthContext);
     const history = useHistory();
 
     async function postLogin( email, password ){
@@ -38,13 +37,15 @@ function SignIn() {
         console.log(`Starting login for ${data.email}`);
         const rc = await postLogin( data.email, data.password);
         if ( rc.success) {
+            console.log('signin - login ok');
             await login();
+            console.log('signin - go to profile');
             history.push('/profile');
         } else {
+            console.log('signin - login failed');
             setLoginError(rc.result);
         }
     }
-
 
     return (
         <>
@@ -52,7 +53,7 @@ function SignIn() {
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab alias cum debitis dolor dolore fuga id
                 molestias qui quo unde?</p>
 
-            {!isLoggedIn &&
+            {!loggedIn &&
             <form onSubmit={handleSubmit(validateSubmit)}>
 
                 <label htmlFor="email">email
@@ -86,7 +87,7 @@ function SignIn() {
             </form>
             }
 
-            {isLoggedIn &&
+            {loggedIn &&
             <p> U bent al ingelogd. Log eerst uit als u opnieuw wilt inloggen.</p>
             }
 

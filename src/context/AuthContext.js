@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import jwtDecode from "jwt-decode";
 import axios from "axios";
 
@@ -12,7 +12,29 @@ function AuthContextProvider({children}) {
         loginReady: false,
     });
 
-    useEffect( ()=>{ login();},[] );
+     const autstatus = useRef({
+        ...loggedIn,
+        login:login,
+        logout: logout,
+        }
+    );
+
+    useEffect( ()=>{
+               async function waitForLogin() {
+                   await login();
+                   autstatus.current = {
+                       ...loggedIn,
+                       login: login,
+                       logout: logout,
+                   }
+               }
+               if( loggedIn.loginReady === false ) {
+                 waitForLogin();
+                 console.log('useeffect');
+                 console.log( autstatus.current );
+               }
+        },[] );
+
 
     async function getUserDetails( accessToken, id ){
         const rc =  {success: false, result: null};
@@ -32,6 +54,7 @@ function AuthContextProvider({children}) {
         }catch(e){
             rc.result = e.response.data;
             console.log( "Error response get user data : ", e.response.data);
+
             return ( rc );
         }
     }
@@ -56,58 +79,75 @@ function AuthContextProvider({children}) {
             );
 
             console.log(`Gebruiker ${ decodedToken.email } is ingelogd`);
+            console.log( loggedIn );
 
-            const rc = getUserDetails( JWT, decodedToken.sub );
+            const rc = await getUserDetails( JWT, decodedToken.sub );
 
             console.log ( 'User details ', rc );
             if ( rc.success){
-                        // user details has following fields:
-                        // email, username, password (bcrypted) and id.
+                // user details has following fields:
+                // email, username, password (bcrypted) and id.
 
-                setLoggedIn({
-                        ...loggedIn,
-                        userDetails: rc.result.data,
-                        loginReady: true,
-                    }
-                );
-
-
-                console.log("loginReady : true");
-
+                const status = {
+                    ...loggedIn,
+                    userDetails: rc.result.data,
+                    user: rc.result.data.username,
+                    loggedIn: true,
+                    loginReady: true,
+                };
+                console.log( 'login success', loggedIn );
+                autstatus.current = { ...status, login: login, logout: logout};
+                setLoggedIn( status );
             }else{
-                setLoggedIn({
-                        ...loggedIn,
-                        loggedIn: false,
-                        userDetails: null,
-                        loginReady: false,
-                    }
-                );
+                const status = {
+                    ...loggedIn,
+                    loggedIn: false,
+                    user: null,
+                    userDetails: null,
+                    loginReady: true,
+                };
+                autstatus.current = { ...status, login: login, logout: logout};
+                setLoggedIn( status );
+                console.log( 'login failure', loggedIn );
             }
 
         } else {
+            const status = {
+                ...loggedIn,
+                loggedIn: false,
+                user: null,
+                userDetails: null,
+                loginReady: true,
+            };
+            autstatus.current = { ...status, login: login, logout: logout};
+            setLoggedIn( status );
             console.log('Aut: Not logged in, invalid user/password');
         }
-        return ( loggedIn.loggedIn );
+        return ( loggedIn );
     }
 
     function logout() {
         console.log(`Gebruiker ${loggedIn.user} logt nu uit`);
-        setLoggedIn({...loggedIn, loggedIn: false, userDetails: null, loginReady: false} );
+        setLoggedIn({...loggedIn, loggedIn: false, userDetails: null, loginReady: true} );
         localStorage.removeItem('token');
     }
 
-
+    console.log( 'end of auth - logged in');
+    console.log( loggedIn );
+    console.log( 'end of auth - autstatus.current');
+    console.log( autstatus.current );
 
     return (
-
-        <AuthContext.Provider value={ {login: login,logout: logout, ...loggedIn} }>
-            {
-                loggedIn ? children : <p>Loading...{ loggedIn}</p>
+        <>
+            { loggedIn.loginReady ?
+                <AuthContext.Provider value={autstatus.current}>
+                    {children}
+                </AuthContext.Provider>
+                : <p>Loading...{loggedIn.loginReady ? "true" : "false"}</p>
             }
+       </>
 
-        </AuthContext.Provider>
     );
-
 
 }
 

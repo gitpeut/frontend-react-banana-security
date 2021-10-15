@@ -1,13 +1,19 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import logo from '../assets/banana-01.png';
 import { useHistory, Link } from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 
 function NavBar() {
   const history = useHistory();
-  const { logout, isLoggedIn, user } = useContext( AuthContext );
+  let { logout, loggedIn, user } = useContext( AuthContext );
+
+  console.log( 'navbar logged in? ', loggedIn );
+  console.log( ( { logout, loggedIn, user } =useContext( AuthContext)) );
+  console.log('end navbar logged in ', );
+
   return (
     <nav>
+
         <Link to="/">
           <span className="logo-container">
             <img src={logo} alt="logo"/>
@@ -18,7 +24,7 @@ function NavBar() {
         </Link>
 
       <div>
-          {!isLoggedIn &&
+          {!loggedIn &&
               <>
               <button
                   type="button"
@@ -34,7 +40,7 @@ function NavBar() {
               </button>
               </>
           }
-          {isLoggedIn &&
+          {loggedIn &&
               <>
               <p className="littlewhite">Logged in as {user}</p>
               <button

@@ -2,11 +2,16 @@ import React, {useContext} from 'react';
 import { Link } from 'react-router-dom';
 import {AuthContext} from "../context/AuthContext";
 
+
+
+
 function Profile() {
-  const {isLoggedIn} = useContext(AuthContext);
+  const {loggedIn} = useContext(AuthContext);
+
+
   return (
     <>
-        {isLoggedIn &&
+        {loggedIn &&
       <>
       <h1>Profielpagina</h1>
       <section>

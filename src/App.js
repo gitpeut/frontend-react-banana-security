@@ -10,8 +10,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import {AuthContext} from "./context/AuthContext";
 
 function App() {
-  const {isLoggedIn} = useContext(AuthContext);
-
+  const {loggedIn} = useContext(AuthContext);
+  console.log('App - ' + loggedIn );
   return (
     <>
       <NavBar />
@@ -20,7 +20,7 @@ function App() {
           <Route exact path="/">
             <Home />
           </Route>
-             <PrivateRoute path="/profile" isAuthenticated={isLoggedIn}>
+             <PrivateRoute path="/profile" isAuthenticated={loggedIn}>
                 <Profile/>
              </PrivateRoute>
           <Route exact path="/signin">
